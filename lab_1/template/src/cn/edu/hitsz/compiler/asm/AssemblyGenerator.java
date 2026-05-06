@@ -22,6 +22,8 @@ import java.util.List;
  */
 public class AssemblyGenerator {
 
+    private List<Instruction> originInstructions;
+
     /**
      * 加载前端提供的中间代码
      * <br>
@@ -31,8 +33,9 @@ public class AssemblyGenerator {
      * @param originInstructions 前端提供的中间代码
      */
     public void loadIR(List<Instruction> originInstructions) {
-        // TODO: 读入前端提供的中间代码并生成所需要的信息
-        throw new NotImplementedException();
+        // TODO: 实验四: 读入前端提供的中间代码并生成所需要的信息
+        // 过滤掉 LABEL 指令，保留实际需要翻译的指令
+        this.originInstructions = originInstructions;
     }
 
 

@@ -48,6 +48,21 @@ public class Instruction {
         return new Instruction(InstructionKind.RET, null, List.of(returnValue));
     }
 
+    public static Instruction createBZ(IRValue cond, String label) {
+        var irLabel = IRVariable.named(label);
+        return new Instruction(InstructionKind.BZ, null, List.of(cond, irLabel));
+    }
+
+    public static Instruction createJMP(String label) {
+        var irLabel = IRVariable.named(label);
+        return new Instruction(InstructionKind.JMP, null, List.of(irLabel));
+    }
+
+    public static Instruction createLabel(String name) {
+        var irLabel = IRVariable.named(name);
+        return new Instruction(InstructionKind.LABEL, irLabel, List.of());
+    }
+
 
     //============================== 不同种类 IR 的参数 getter ==============================
     public InstructionKind getKind() {
@@ -55,7 +70,7 @@ public class Instruction {
     }
 
     public IRVariable getResult() {
-        ensureKindMatch(Set.of(InstructionKind.ADD, InstructionKind.SUB, InstructionKind.MUL, InstructionKind.MOV));
+        ensureKindMatch(Set.of(InstructionKind.ADD, InstructionKind.SUB, InstructionKind.MUL, InstructionKind.MOV, InstructionKind.LABEL));
         return result;
     }
 
@@ -79,6 +94,21 @@ public class Instruction {
         return operands.get(0);
     }
 
+    public IRValue getBranchCondition() {
+        ensureKindMatch(Set.of(InstructionKind.BZ));
+        return operands.get(0);
+    }
+
+    public String getBranchLabel() {
+        ensureKindMatch(Set.of(InstructionKind.BZ, InstructionKind.JMP));
+        return operands.get(operands.size() == 2 ? 1 : 0).toString();
+    }
+
+    public String getLabelName() {
+        ensureKindMatch(Set.of(InstructionKind.LABEL));
+        return result != null ? result.getName() : "";
+    }
+
 
     //============================== 基础设施 ==============================
     @Override
@@ -86,6 +116,15 @@ public class Instruction {
         final var kindString = kind.toString();
         final var resultString = result == null ? "" : result.toString();
         final var operandsString = operands.stream().map(Objects::toString).collect(Collectors.joining(", "));
+        if (kind == InstructionKind.BZ) {
+            return "(%s, %s, %s)".formatted(kindString, operands.get(0), operands.get(1));
+        }
+        if (kind == InstructionKind.JMP) {
+            return "(%s, , %s)".formatted(kindString, operands.get(0));
+        }
+        if (kind == InstructionKind.LABEL) {
+            return "(%s, %s)".formatted(kindString, resultString);
+        }
         return "(%s, %s, %s)".formatted(kindString, resultString, operandsString);
     }
 

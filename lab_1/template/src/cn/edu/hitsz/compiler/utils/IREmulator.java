@@ -19,35 +19,57 @@ public class IREmulator {
     }
 
     public Optional<Integer> execute() {
-        for (final var instruction : instructions) {
+        // 预扫描标签位置
+        var labelPositions = new HashMap<String, Integer>();
+        for (int i = 0; i < instructions.size(); i++) {
+            var inst = instructions.get(i);
+            if (inst.getKind().isLabel()) {
+                labelPositions.put(inst.getLabelName(), i);
+            }
+        }
+
+        int ip = 0;
+        while (ip < instructions.size()) {
+            final var instruction = instructions.get(ip);
             switch (instruction.getKind()) {
                 case MOV -> {
                     final var from = eval(instruction.getFrom());
                     environment.put(instruction.getResult(), from);
                 }
-
                 case ADD -> {
                     final var lhs = eval(instruction.getLHS());
                     final var rhs = eval(instruction.getRHS());
                     environment.put(instruction.getResult(), lhs + rhs);
                 }
-
                 case SUB -> {
                     final var lhs = eval(instruction.getLHS());
                     final var rhs = eval(instruction.getRHS());
                     environment.put(instruction.getResult(), lhs - rhs);
                 }
-
                 case MUL -> {
                     final var lhs = eval(instruction.getLHS());
                     final var rhs = eval(instruction.getRHS());
                     environment.put(instruction.getResult(), lhs * rhs);
                 }
-
-                case RET -> this.returnValue = eval(instruction.getReturnValue());
-
+                case RET -> {
+                    this.returnValue = eval(instruction.getReturnValue());
+                    break;
+                }
+                case BZ -> {
+                    var cond = eval(instruction.getBranchCondition());
+                    if (cond == 0) {
+                        ip = labelPositions.getOrDefault(instruction.getBranchLabel(), ip);
+                    }
+                }
+                case JMP -> {
+                    ip = labelPositions.getOrDefault(instruction.getBranchLabel(), ip);
+                }
+                case LABEL -> {
+                    // no-op, just a position marker
+                }
                 default -> throw new RuntimeException("Unknown instruction kind: " + instruction.getKind());
             }
+            ip++;
         }
 
         return Optional.ofNullable(this.returnValue);
