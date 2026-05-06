@@ -71,12 +71,12 @@ public class Main {
         final var emulator = IREmulator.load(instructions);
         FileUtils.writeFile(FilePathConfig.EMULATE_RESULT, emulator.execute().map(Objects::toString).orElse("No return value"));
 
-        // // 由 IR 生成汇编
-        // final var asmGenerator = new AssemblyGenerator();
-        // asmGenerator.loadIR(instructions);
-        // asmGenerator.run();
-        // asmGenerator.dump(FilePathConfig.ASSEMBLY_LANGUAGE_PATH);
+        // 由 IR 生成汇编
+        final var asmGenerator = new AssemblyGenerator();
+        asmGenerator.loadIR(instructions);
+        asmGenerator.run();
+        asmGenerator.dump(FilePathConfig.ASSEMBLY_LANGUAGE_PATH);
 
-        System.out.println("实验三运行完成！请查看 data/out/ 目录下的输出文件");
+        System.out.println("实验四运行完成！请查看 data/out/ 目录下的输出文件");
     }
 }
